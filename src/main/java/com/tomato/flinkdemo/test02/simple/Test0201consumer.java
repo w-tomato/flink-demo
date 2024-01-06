@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -31,12 +32,16 @@ public class Test0201consumer {
             properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-            DataStreamSource<String> message = env.addSource(new FlinkKafkaConsumer011<>("db_kafka_topic", new SimpleStringSchema(), properties));
+            FlinkKafkaConsumer011<String> dbKafkaTopic = new FlinkKafkaConsumer011<>("db_kafka_topic", new SimpleStringSchema(), properties);
+            DataStreamSource<String> message = env.addSource(dbKafkaTopic);
             message.map(new MapFunction<String, JSONObject>() {
                             @Override
                             public JSONObject map(String s) throws Exception {
                                 System.out.println("已收到 并入库：" + s);
                                 LOG.info("已收到 并入库：" + s);
+                                if (!s.startsWith("{")) {
+                                    return null;
+                                }
                                 JSONObject jsonObject = JSONObject.parseObject(s);
                                 String name = jsonObject.getString("name");
                                 String count = jsonObject.getString("count");
@@ -49,7 +54,7 @@ public class Test0201consumer {
                             }
                         }
 
-            ).addSink(new ConnectMySqlSink());
+            ).filter(Objects::nonNull).addSink(new ConnectMySqlSink());
             env.execute("Test02consumer kafka to db");
         } catch (Exception e) {
             e.printStackTrace();

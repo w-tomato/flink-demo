@@ -45,7 +45,6 @@ public class ConnectMySqlSource extends RichSourceFunction<SourceVO> {
 
                 SourceVO vo = new SourceVO();
 
-                vo.setId(resultSet.getString("id"));
                 vo.setName(resultSet.getString("name"));
                 vo.setCount(resultSet.getString("count"));
                 vo.setCategory(resultSet.getString("category"));

@@ -30,7 +30,7 @@ public class ConnectMySqlSink extends RichSinkFunction<JSONObject> {
         // 获取数据库连接
         connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/flink_test", "root", "whc123");//获取连接
 
-        preparedStatement = connection.prepareStatement("insert into db_test02 (name, category_count)values(?,?,?)");
+        preparedStatement = connection.prepareStatement("insert into db_test02 (name, category_count)values(?,?)");
 
         super.open(parameters);
 
